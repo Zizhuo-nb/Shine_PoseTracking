@@ -142,13 +142,11 @@ def static_mapping(cg, voxel_field, mlp, dataloder, sampler, startframe, endfram
     # print(f"[INFO] Model saved to: {save_path}")
     # ###########################################################
     ###########################################################
-    # 生成和 pose tracking 一样的 run 名：yaml名_起始帧-结束帧
     run_name = f"{cg.yaml_name}_{startframe:06d}-{endframe-1:06d}"
 
-    save_dir = "model_save"              # 统一放在 model_save 目录
+    save_dir = "model_save"             
     os.makedirs(save_dir, exist_ok=True)
 
-    # 模型文件名就用这个 run_name，不再额外加 model_
     save_path = os.path.join(save_dir, f"{run_name}.pth")
 
     checkpoint = {
