@@ -22,7 +22,6 @@ if __name__ == "__main__":
 
     begin = 4325
     end   = 4350    
-
     cg = Config()
     cg.load(cfg_path)
     cg.yaml_name   = Path(cfg_path).stem
