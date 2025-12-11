@@ -90,7 +90,6 @@ class Posetracker:
         points = points[points.norm(dim=-1)<self.max_dist]
         points = torch.cat([points, torch.ones_like(points[:,:1])], dim=-1)
 
-
         if self.use_constant_velocity and len(self.est_poses)>0:
             init_guess = self.constant_velocity @ self.pose
         else:
