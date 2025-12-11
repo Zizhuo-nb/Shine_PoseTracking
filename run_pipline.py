@@ -287,8 +287,8 @@ def run_pipeline(cfg_path: str,
 
 
 if __name__ == "__main__":
-    cfg_path = "config/zappa/zappa.yaml"
-    data_dir = "/automount_home_students/zzhang/research/ThirdSemester/project_part2/data/cppdata/Data/PLY/"
+    cfg_path = "config/self_data/self_data.yaml"
+    data_dir = "/automount_home_students/zzhang/research/ThirdSemester/project_part2/data/self_record/data/velodyne/"
     out_root_root = "./results_sub_map"
 
     run_pipeline(
