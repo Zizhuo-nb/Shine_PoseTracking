@@ -25,6 +25,10 @@ def track_sequence(cg: Config,
                    use_constant_velocity: bool = False,
                    tracker_max_dist: float = None):
 
+    print(f"[DEBUG] track_sequence begin={cg.begin_frame}, "
+      f"init_pose_override_is_none={init_pose_override is None}")
+
+    
     device = cg.device
     dtype = cg.dtype
     max_dist = tracker_max_dist if tracker_max_dist is not None else 22

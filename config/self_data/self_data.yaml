@@ -5,7 +5,7 @@ setting:
   calib_path: ""
   output_root: "/automount_home_students/zzhang/research/ThirdSemester/project_part2/code/Shine_PoseTracking/experiments/"
   begin_frame: 0
-  end_frame: 6770
+  end_frame: 4470
   device: "cuda"
   gpu_id: "0"
   hash_buffer_size: 100000000

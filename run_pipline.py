@@ -114,12 +114,13 @@ def run_pipeline(cfg_path: str,
         run_name_sub = f"{cg_sub.yaml_name}_{cg_sub.begin_frame:06d}-{cg_sub.end_frame-1:06d}"
         ckpt_path = os.path.join(model_root, f"{run_name_sub}.pth")
 
+
         _, _, need_refine = track_sequence(
             cg=cg_sub,
             ckpt_path=ckpt_path,
             data_dir=data_dir,
             out_root_dir=out_root_dir,
-            init_pose_override=None,
+            init_pose_override=entry_pose,
             pose_file=None,     
             err_file=None, 
             err_thresh=err_thresh,
