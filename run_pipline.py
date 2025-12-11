@@ -46,7 +46,6 @@ def run_pipeline(cfg_path: str,
     pose_file = os.path.join(out_root_dir, "poses.txt")
     err_file  = os.path.join(out_root_dir, "errors.txt")
 
- 
     if os.path.exists(pose_file):
         os.remove(pose_file)
     if os.path.exists(err_file):
