@@ -30,8 +30,8 @@ conda activate shine_plus
 2) Run mapping, then pose tracking:
 
 ```bash
-python mapping.py <your path to yaml>
-python tracker.py --cfg <your path to yaml> --ckpt <your path to .pth>
+python mapping.py <path_to_yaml>
+python tracker.py --cfg <path_to_yaml> --ckpt <path_to_ckpt>
 ```
 ## Results
 ### 1) Ground Truth Trajectory
