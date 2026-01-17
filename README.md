@@ -41,3 +41,17 @@ python tracker.py ./config/kitti/kitti.yaml
 ### 2) Tracked Trajectory
 
 ![Result](https://private-user-images.githubusercontent.com/208842620/537233758-ce3070cd-f9c4-4432-a46a-bf0b12c8e24d.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3Njg2OTE5NDQsIm5iZiI6MTc2ODY5MTY0NCwicGF0aCI6Ii8yMDg4NDI2MjAvNTM3MjMzNzU4LWNlMzA3MGNkLWY5YzQtNDQzMi1hNDZhLWJmMGIxMmM4ZTI0ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjYwMTE3JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI2MDExN1QyMzE0MDRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT02MTI4MjMzMGZkOGIyNTEyNmUzMjY0NTFlMzA3OWRlMjkwNGQ4NDU2ZDkzMmJlY2E4Mzc2NmIyNGM4YjhjNzhkJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.uVOJ-RV3gerPrZBEwIeRn7DC54hrS0hgcFVe-S7sg9U)
+
+
+## References
+
+[1] X. Zhong, Y. Pan, J. Behley, and C. Stachniss, *SHINE-Mapping: Large-Scale 3D Mapping Using Sparse Hierarchical Implicit Neural Representations*, ICRA 2023.  
+DOI: [10.1109/ICRA48891.2023.10160907](https://doi.org/10.1109/ICRA48891.2023.10160907)  
+PDF: [ipb.uni-bonn.de/pdfs/zhong2023icra.pdf](https://www.ipb.uni-bonn.de/pdfs/zhong2023icra.pdf)  
+arXiv: [2210.02299](https://arxiv.org/abs/2210.02299)  
+Code: [github.com/PRBonn/SHINE_mapping](https://github.com/PRBonn/SHINE_mapping)
+
+[2] L. Wiesmann, T. Guadagnino, I. Vizzo, N. Zimmerman, Y. Pan, H. Kuang, J. Behley, and C. Stachniss, *LocNDF: Neural Distance Field Mapping for Robot Localization*, IEEE Robotics and Automation Letters (RA-L), 2023.  
+DOI: [10.1109/LRA.2023.3291274](https://doi.org/10.1109/LRA.2023.3291274)  
+PDF: [ipb.uni-bonn.de/.../wiesmann2023ral-icra.pdf](https://www.ipb.uni-bonn.de/wp-content/papercite-data/pdf/wiesmann2023ral-icra.pdf)  
+Code: [github.com/PRBonn/LocNDF](https://github.com/PRBonn/LocNDF)
