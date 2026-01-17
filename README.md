@@ -46,12 +46,6 @@ python tracker.py ./config/kitti/kitti.yaml
 ## References
 
 [1] X. Zhong, Y. Pan, J. Behley, and C. Stachniss, *SHINE-Mapping: Large-Scale 3D Mapping Using Sparse Hierarchical Implicit Neural Representations*, ICRA 2023.  
-DOI: [10.1109/ICRA48891.2023.10160907](https://doi.org/10.1109/ICRA48891.2023.10160907)  
-PDF: [ipb.uni-bonn.de/pdfs/zhong2023icra.pdf](https://www.ipb.uni-bonn.de/pdfs/zhong2023icra.pdf)  
-arXiv: [2210.02299](https://arxiv.org/abs/2210.02299)  
-Code: [github.com/PRBonn/SHINE_mapping](https://github.com/PRBonn/SHINE_mapping)
 
 [2] L. Wiesmann, T. Guadagnino, I. Vizzo, N. Zimmerman, Y. Pan, H. Kuang, J. Behley, and C. Stachniss, *LocNDF: Neural Distance Field Mapping for Robot Localization*, IEEE Robotics and Automation Letters (RA-L), 2023.  
-DOI: [10.1109/LRA.2023.3291274](https://doi.org/10.1109/LRA.2023.3291274)  
-PDF: [ipb.uni-bonn.de/.../wiesmann2023ral-icra.pdf](https://www.ipb.uni-bonn.de/wp-content/papercite-data/pdf/wiesmann2023ral-icra.pdf)  
-Code: [github.com/PRBonn/LocNDF](https://github.com/PRBonn/LocNDF)
+
