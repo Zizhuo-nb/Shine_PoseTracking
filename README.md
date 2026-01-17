@@ -2,6 +2,7 @@
 
 ### 1) Install Conda
 Install **Miniconda** (or Mambaforge/Anaconda) on your system.
+Anaconda3 : https://www.anaconda.com/download
 
 ### 2) Create the environment
 From the repository root:
