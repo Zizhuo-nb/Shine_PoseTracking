@@ -1,0 +1,41 @@
+# 4D_Neural_SDF
+setting:
+  data_path: "/media/niklast/WD_hard_disk/master_project/data/kitti/05/velodyne/"
+  pose_path: "/media/niklast/WD_hard_disk/master_project/data/kitti/05/poses.txt"
+  calib_path: "/media/niklast/WD_hard_disk/master_project/data/kitti/05/calib.txt"
+  output_root: "/home/niklast/Proj/master_project/shine_mapping_plus/output/"
+  begin_frame: 0
+  end_frame: 3000
+  device: "cuda"
+  gpu_id: "0"
+  
+preprocessing:
+  min_z: -5.0
+  radius: 40.0
+  
+neuralvoxel:
+  leaf_voxel_size: 0.3
+  voxel_level_num : 2
+  scale_up_factor : 1.5
+  feature_dim: 8  
+  feature_std: 0.0
+  
+decoder:
+  mlp_level: 2
+  mlp_hidden_dim: 64
+
+sampler:
+  truncated_sample_range_m: 0.5
+  truncated_sample_num: 3
+  occupied_sample_range_m: 0.45
+  occupied_sample_num: 2
+  free_sample_num: 2
+  
+mapping:
+  sliding_window_size: 30
+  iterion_num: 20
+  batch_size: 16384
+  learning_rate: 0.001
+  
+meshing:
+   mesh_resolution: 0.4
