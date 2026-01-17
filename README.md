@@ -8,6 +8,11 @@ From the repository root:
 
 ```bash
 conda env create -f environment.yml
+```
 
+### 3) Activate the environment
 
-
+Use the environment name defined in environment.yml (example: shine_plus):
+```bash
+conda activate shine_plus
+```
