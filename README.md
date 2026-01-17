@@ -30,8 +30,8 @@ conda activate shine_plus
 2) Run mapping, then pose tracking:
 
 ```bash
-python mapping.py ./config/zappa/zappa.yaml
-python tracker.py ./config/zappa/zappa.yaml
+python mapping.py <your path to yaml>
+python tracker.py --cfg <your path to yaml> --ckpt <your path to .pth>
 ```
 ## Results
 ### 1) Ground Truth Trajectory
