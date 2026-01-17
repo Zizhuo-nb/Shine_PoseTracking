@@ -1,22 +1,16 @@
 # SHINE_PoseTracking
 
+## Environment Setup (Conda)
 
+### 1) Install Conda
+Install **Miniconda** (or Mambaforge/Anaconda) on your system.
 
-## Installation
+### 2) Create the environment
+From the repository root:
 
-### 3. dependency
+```bash
+conda env create -f environment.yml
 
-```
-pytorch
-numpy
-open3d
-tqdm
-os
-sys
-torch
-colletions
-glob
-```
 
 ## Run
 change some path in config floder,mapping first, then posetracking
