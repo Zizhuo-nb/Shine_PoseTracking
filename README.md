@@ -30,8 +30,8 @@ conda activate shine_plus
 2) Run mapping, then pose tracking:
 
 ```bash
-python mapping.py ./config/kitti/kitti.yaml
-python tracker.py ./config/kitti/kitti.yaml
+python mapping.py ./config/zappa/zappa.yaml
+python tracker.py ./config/zappa/zappa.yaml
 ```
 ## Results
 ### 1) Ground Truth Trajectory
