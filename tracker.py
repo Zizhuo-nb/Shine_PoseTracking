@@ -185,7 +185,6 @@ def track_sequence(cfg_path: str,
 
 
 
-
 if __name__ == "__main__":
     import argparse
 
