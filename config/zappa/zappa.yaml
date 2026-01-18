@@ -10,7 +10,6 @@ setting:
   hash_buffer_size: 100000000
 
   output_root: "../results"
-  model_dir: "../model_save/"
   mesh_root: "../results/mesh/"
   
 ####for vis####
