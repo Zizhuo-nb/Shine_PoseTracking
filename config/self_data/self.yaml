@@ -10,10 +10,10 @@ setting:
   hash_buffer_size: 100000000
 
   output_root: "../results"
-  mesh_root: "../results/mesh/"
+  mesh_root: "../results/meshes/"
 
 ####for vis####
-  map_ply: "../results/mesh/self_000000-004469.ply" #path to your reconstructed mesh
+  map_ply: "../results/meshes/self_000000-004469.ply" #path to your reconstructed mesh
   vis_n: 1 #how many frames to estimate and show at a time
   enable_vis: false
   

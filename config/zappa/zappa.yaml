@@ -4,16 +4,16 @@ setting:
   pose_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/cppdata/Data/gt_poses.txt"
   calib_path: ""
   begin_frame: 0
-  end_frame: 4770
+  end_frame: 6770
   device: "cuda"
   gpu_id: "0"
   hash_buffer_size: 100000000
 
   output_root: "../results"
-  mesh_root: "../results/mesh/"
+  mesh_root: "../results/meshes/"
   
 ####for vis####
-  map_ply: "../results/mesh/zappa_000000-006769.ply" #path to your reconstructed mesh
+  map_ply: "../results/meshes/zappa_000000-006769_full.ply" #path to your reconstructed mesh
   vis_n: 1 #how many frames to estimate and show at a time
   enable_vis: false
   
