@@ -36,6 +36,7 @@ conda activate shine_posetracking
 python mapping.py <path_to_yaml>
 python tracker.py --cfg <path_to_yaml> --ckpt <path_to_ckpt>
 ```
+For tracker.py, if enable 'enable_vis', it'll show the reconstruction and pointCloud for each frame
 ## Results
 ### 1) Ground Truth Trajectory
 <img width="640" height="480" alt="Figure_gt" src="https://github.com/user-attachments/assets/923707cf-44c6-448c-a101-8325044248aa" />
