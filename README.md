@@ -1,4 +1,4 @@
-This repository trains a neural SDF map using an internal, unreleased **SHINE-Mapping+** variant, and then performs implicit neural pose tracking by aligning each scan to the learned map.
+
 
 ## Environment Setup (Conda)
 
