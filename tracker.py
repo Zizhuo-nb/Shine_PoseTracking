@@ -1,63 +1,95 @@
 import os
-import math
-import open3d as o3d
-import copy
-import glob
 import torch
 from pathlib import Path
 import yaml
 import argparse
 import torch.nn as nn
-from utils.dataLoader import read_calib_file, read_poses_file
 import numpy as np
+import matplotlib.pyplot as plt
 
 from utils.config import Config
+from utils.dataLoader import read_poses_file
 from model.neural_voxel_hash import NeuralHashVoxel
 from model import decoder
 
 from pose_tracking_utils import icp_solver
-from pose_tracking_utils.utils import compute_pose_error,run_full_debug_csv
-from pose_tracking_utils.live_visu import run_live_viz_step0
+from pose_tracking_utils.live_visu import run_live_viz
 
 
+# ---------------- plotting (your code, slightly adapted to be callable) ----------------
+def load_kitti_poses_txt(path: str) -> np.ndarray:
+    """
+    Each line: 12 floats (3x4) row-major:
+    r11 r12 r13 tx  r21 r22 r23 ty  r31 r32 r33 tz
+    Returns: (N,3) translations [x,y,z]
+    """
+    data = np.loadtxt(path)
+    if data.ndim == 1:
+        data = data[None, :]
+    if data.shape[1] < 12:
+        raise ValueError(f"Expected >=12 columns, got {data.shape[1]}")
+    pose12 = data[:, -12:]
+    tx = pose12[:, 3]
+    ty = pose12[:, 7]
+    tz = pose12[:, 11]
+    return np.stack([tx, ty, tz], axis=1)
+
+
+def plot_xy_trajectory_from_txt(txt_path: str, equal_axis: bool = False):
+    t = load_kitti_poses_txt(txt_path)
+    x, y = t[:, 0], t[:, 1]
+    plt.figure()
+    plt.plot(x, y)
+    plt.xlabel("x (m)")
+    plt.ylabel("y (m)")
+    plt.title("XY Trajectory")
+    if equal_axis:
+        plt.axis("equal")
+    plt.grid(True)
+    plt.show()
+
+
+# ---------------- main pipeline ----------------
 def track_sequence(cfg_path: str,
                    ckpt_path: str,
-                   out_pose_path: str = None,
-                   out_err_path: str = None):
-    ##################################################
+                   out_pose_path: str = None):
+    # --------- read yaml (for switches/paths) ----------
     with open(cfg_path, "r", encoding="utf-8") as f:
         raw_cfg = yaml.safe_load(f) or {}
     setting = raw_cfg.get("setting", {})
+
     data_dir = setting.get("data_path", None)
     pose_path = setting.get("pose_path", None)
     output_root = setting.get("output_root", "results")
     begin_frame = int(setting.get("begin_frame", 0))
     end_frame = int(setting.get("end_frame", -1))
+    enable_vis = bool(setting.get("enable_vis", False))
+    vis_n = int(setting.get("vis_n", 5))
+
+    # plotting option (optional)
+    plot_equal = bool(setting.get("plot_equal_axis", False))
+
     if not data_dir:
         raise ValueError("YAML doesn't have setting.data_path")
     if not pose_path:
         raise ValueError("YAML doesn't have setting.pose_path")
-    
-    map_ply = setting.get("map_ply", None)
-    if not map_ply:
-        raise ValueError("YAML doesn't have setting.map_ply")
 
-    # vis_n = int(setting.get("vis_n", 5))
-    # vis_k = int(setting.get("vis_k", 50))
-    
+    map_ply = setting.get("map_ply", None)
+    if enable_vis and (not map_ply):
+        raise ValueError("YAML doesn't have setting.map_ply but enable_vis=true")
 
     out_dir = Path(output_root)
     out_dir.mkdir(parents=True, exist_ok=True)
-    
+
     if out_pose_path is None:
         out_pose_path = str(out_dir / "tracked_poses.txt")
-    if out_err_path is None:
-        out_err_path = str(out_dir / "pose_errors.txt")
-    ######################################################
+
+    # --------- load model cfg ----------
     cg = Config()
     cg.load(cfg_path)
     device = cg.device
-    ##################################################
+
+    # --------- build voxel field + mlp ----------
     voxel_field = NeuralHashVoxel(
         feature_dim=cg.feature_dim,
         feature_std=cg.feature_std,
@@ -81,6 +113,7 @@ def track_sequence(cfg_path: str,
     ckpt = torch.load(ckpt_path, map_location=device)
     vf_state = ckpt["voxel_field"]
 
+    # Make sure features_list params exist with correct shapes
     with torch.no_grad():
         for level in range(len(voxel_field.features_list)):
             key = f"features_list.{level}"
@@ -90,6 +123,7 @@ def track_sequence(cfg_path: str,
                 voxel_field.features_list[level] = nn.Parameter(
                     torch.empty(shape, device=device, dtype=param_dtype)
                 )
+
     voxel_field.load_state_dict(vf_state)
     mlp.load_state_dict(ckpt["mlp"])
 
@@ -104,20 +138,19 @@ def track_sequence(cfg_path: str,
         p.requires_grad_(False)
     for p in mlp.parameters():
         p.requires_grad_(False)
-    ############################################################
 
+    # --------- init pose from GT ----------
     calib = {"Tr": np.eye(4)}
-    gt_poses = read_poses_file(pose_path, calib)   # list of 4x4 np.array
+    gt_poses = read_poses_file(pose_path, calib)  # list of 4x4 np.array
     gt_poses_torch = [torch.as_tensor(T, device=device, dtype=torch.float64) for T in gt_poses]
-    if begin_frame < 0 or begin_frame >= len(gt_poses):
-        raise IndexError(f"begin_frame={begin_frame} is more than gt_poses len={len(gt_poses)}")
+
+    if begin_frame < 0 or begin_frame >= len(gt_poses_torch):
+        raise IndexError(f"begin_frame={begin_frame} is more than gt_poses len={len(gt_poses_torch)}")
+
     init_T = gt_poses_torch[begin_frame].clone()
     print(init_T)
-    ###############
-    gt_poses_np = [T for T in gt_poses]
-    #################
-#############################################################################################################
-    scalar_factor = -5.0 / cg.truncated_sample_range_m
+
+    # --------- create tracker ----------
     tracker = icp_solver.Posetracker(
         test_folder=data_dir,
         voxel_field=voxel_field,
@@ -132,68 +165,50 @@ def track_sequence(cfg_path: str,
         min_z=cg.min_z,
     )
 
-    # if end_frame < 0:
-    #     end_frame = len(tracker.file_list) - 1
-    # end_frame = min(end_frame, len(tracker.file_list) - 1)
-    # auto = bool(setting.get("auto_debug_csv", False))
-    # if auto:
-    #     csv_path = str(setting.get("debug_csv_path", str(out_dir / "sdf_debug_full.csv")))
-    #     run_full_debug_csv(tracker, gt_poses_np, begin_frame, end_frame, csv_path)
-    #     return
-    ########################
+    # normalize end_frame
+    if end_frame < 0:
+        end_frame = len(tracker.file_list) - 1
+    end_frame = min(end_frame, len(tracker.file_list) - 1)
+
+    # --------- mode switch ----------
+    if enable_vis:
+        run_live_viz(
+            tracker=tracker,
+            map_ply=map_ply,
+            begin_frame=begin_frame,
+            end_frame=end_frame,
+            vis_n=vis_n,
+        )
+        return
+
+    # --------- tracking only: save poses then plot ----------
     poses_out = []
-    err_rows = []
     while tracker.running_idx <= end_frame:
-        i = tracker.running_idx
+        i = int(tracker.running_idx)
         print(f"[INFO] Processing frame {i}: {os.path.basename(tracker.file_list[i])}")
-        T_global,_ = tracker.register_next()
-        poses_out.append(T_global.clone().cpu()) 
+        T_global, _ = tracker.register_next()
+        poses_out.append(T_global.detach().cpu())
 
-        T_gt = gt_poses_torch[i]
-        t_err, r_err, dx, dy, dz = compute_pose_error(T_global, T_gt)
-        print(f"[ERR] frame {i}: t_err={t_err:.4f} m, r_err={r_err:.3f} deg, "
-              f"dx={dx:.4f}, dy={dy:.4f}, dz={dz:.4f}")
-        err_rows.append((i, t_err, r_err, dx, dy, dz))
-
+    # Write as 12 floats per line (your plot script reads this)
+    os.makedirs(os.path.dirname(out_pose_path) or ".", exist_ok=True)
     with open(out_pose_path, "w", encoding="utf-8") as f:
         for T in poses_out:
-            Tn = T.numpy()
-            vals = Tn[:3, :].reshape(-1).tolist()
-            f.write(" ".join(f"{v:.5f}" for v in vals) + "\n")
+            Tn = T.numpy().astype(np.float64)
+            vals = Tn[:3, :].reshape(-1).tolist()  # 12 values
+            f.write(" ".join(f"{v:.8f}" for v in vals) + "\n")
 
-    with open(out_err_path, "w", encoding="utf-8") as f:
-        f.write("# frame t_err(m) r_err(deg) dx dy dz\n")
-        for (i, t_err, r_err, dx, dy, dz) in err_rows:
-            f.write(f"{i} {t_err:.6f} {r_err:.6f} {dx:.6f} {dy:.6f} {dz:.6f}\n")
+    print(f"[INFO] Saved poses: {out_pose_path}")
 
-    print(f"[INFO] Saved poses:  {out_pose_path}")
-    print(f"[INFO] Saved errors: {out_err_path}")
-############################
-#     run_live_viz_step0(
-#     tracker=tracker,
-#     map_ply=map_ply,
-#     begin_frame=begin_frame,
-#     end_frame=end_frame,
-#     gt_poses_np=gt_poses_np,
-#     gt_poses_torch=gt_poses_torch,
-#     out_pose_path=out_pose_path,
-#     out_err_path=out_err_path,
-#     vis_n=vis_n,
-#     vis_k=1,
-#     resume_from_file=False,
-# )
-
+    # Plot immediately (same process)
+    plot_xy_trajectory_from_txt(out_pose_path, equal_axis=plot_equal)
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Pose tracking + per-frame GT error print/save")
+    parser = argparse.ArgumentParser(description="Pose tracking: YAML enable_vis controls live viz vs plot")
     parser.add_argument("--cfg", required=True, help="Path to YAML config")
     parser.add_argument("--ckpt", required=True, help="Path to checkpoint .pth")
     parser.add_argument("--out_pose", default=None, help="Output pose txt path (optional)")
-    parser.add_argument("--out_err", default=None, help="Output error txt path (optional)")
     args = parser.parse_args()
 
     print("[INFO] tracker main start")
-    track_sequence(args.cfg, args.ckpt, out_pose_path=args.out_pose, out_err_path=args.out_err)
+    track_sequence(args.cfg, args.ckpt, out_pose_path=args.out_pose)

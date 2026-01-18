@@ -1,12 +1,6 @@
 import torch
 from .utils import expmap,parse_scan,compute_gradient,forward_points_to_network,process_points
-from typing import Optional
-from os.path import join
 import numpy as np
-from model.neural_voxel_hash import NeuralHashVoxel
-from model import decoder
-import sys
-from utils.config import Config
 import glob
 import os
 from natsort import natsorted
@@ -130,13 +124,12 @@ class Posetracker:
                 break
         return T
 
-
     def registration_step(self, points: torch.Tensor, GM_k=None):
         points, distances, gradients = self.forward(points)
         hash_valid = self.feature.get_valid_mask(points[...,:3])
         grad_norm = gradients.norm(dim=-1, keepdim=True)
-        eps = 1e-4
-        grad_valid = grad_norm.squeeze(-1) > eps
+        # eps = 1e-4
+        # grad_valid = grad_norm.squeeze(-1) > eps
         # valid = hash_valid & grad_valid
         valid = hash_valid
         if valid.sum() < 10:
@@ -160,7 +153,6 @@ def df_icp(points, gradients, distances, GM_k = None):
         w = 1
     else:
         w = GM_k/(GM_k+distances**2)**2
-    
     cross = torch.cross(points, gradients)
     J = torch.cat([gradients,cross],-1)
     N = J.T @(w*J)
