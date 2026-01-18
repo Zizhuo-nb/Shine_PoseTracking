@@ -3,42 +3,45 @@ setting:
   data_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/self_data/data_round1/data/velodyne/"
   pose_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/self_data/data_round1/data/kitti_round1_poses.txt"
   calib_path: ""
-  output_root: "./results"
   begin_frame: 0
   end_frame: 4770
   device: "cuda"
   gpu_id: "0"
   hash_buffer_size: 100000000
 
+  output_root: "../results"
+  model_dir: "../model_save/"
+  mesh_root: "../results/mesh/"
 
-  map_ply: "F:/UNIVERSITY_BONN/Third Semester/project_part2/code/mileStone3/results/self_000000-004469.ply" #path to your reconstructed mesh
+####for vis####
+  map_ply: "../results/mesh/self_000000-004469.ply" #path to your reconstructed mesh
   vis_n: 1 #how many frames to estimate and show at a time
   enable_vis: false
   
 preprocessing:
   min_z: -5.0
   radius: 30.0
-
+  
   
 neuralvoxel:
   leaf_voxel_size: 0.3
   voxel_level_num : 2
   scale_up_factor : 1.5
-  feature_dim: 8
+  feature_dim: 16  
   feature_std: 0.0
-
+  
 decoder:
   mlp_level: 2
-  mlp_hidden_dim: 64
+  mlp_hidden_dim: 128
 
 sampler:
-  truncated_sample_range_m: 0.3
-  truncated_sample_num: 6
-  occupied_sample_range_m: 0.25
-  occupied_sample_num: 3
-  free_sample_num: 5
-
-mapping:
+  truncated_sample_range_m: 0.5
+  truncated_sample_num: 3
+  occupied_sample_range_m: 0.45
+  occupied_sample_num: 2
+  free_sample_num: 2
+  
+mapping: 
   sliding_window_size: 30
   iterion_num: 20
   batch_size: 16384

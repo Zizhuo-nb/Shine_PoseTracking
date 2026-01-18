@@ -5,8 +5,8 @@ import yaml
 import argparse
 import torch.nn as nn
 import numpy as np
-import matplotlib.pyplot as plt
 
+from pose_tracking_utils.draw import draw_txt
 from utils.config import Config
 from utils.dataLoader import read_poses_file
 from model.neural_voxel_hash import NeuralHashVoxel
@@ -14,40 +14,6 @@ from model import decoder
 
 from pose_tracking_utils import icp_solver
 from pose_tracking_utils.live_visu import run_live_viz
-
-
-# ---------------- plotting (your code, slightly adapted to be callable) ----------------
-def load_kitti_poses_txt(path: str) -> np.ndarray:
-    """
-    Each line: 12 floats (3x4) row-major:
-    r11 r12 r13 tx  r21 r22 r23 ty  r31 r32 r33 tz
-    Returns: (N,3) translations [x,y,z]
-    """
-    data = np.loadtxt(path)
-    if data.ndim == 1:
-        data = data[None, :]
-    if data.shape[1] < 12:
-        raise ValueError(f"Expected >=12 columns, got {data.shape[1]}")
-    pose12 = data[:, -12:]
-    tx = pose12[:, 3]
-    ty = pose12[:, 7]
-    tz = pose12[:, 11]
-    return np.stack([tx, ty, tz], axis=1)
-
-
-def plot_xy_trajectory_from_txt(txt_path: str, equal_axis: bool = False):
-    t = load_kitti_poses_txt(txt_path)
-    x, y = t[:, 0], t[:, 1]
-    plt.figure()
-    plt.plot(x, y)
-    plt.xlabel("x (m)")
-    plt.ylabel("y (m)")
-    plt.title("XY Trajectory")
-    if equal_axis:
-        plt.axis("equal")
-    plt.grid(True)
-    plt.show()
-
 
 # ---------------- main pipeline ----------------
 def track_sequence(cfg_path: str,
@@ -82,7 +48,10 @@ def track_sequence(cfg_path: str,
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if out_pose_path is None:
-        out_pose_path = str(out_dir / "tracked_poses.txt")
+        yaml_name = Path(cfg_path).stem
+        run_name = f"{yaml_name}_{begin_frame:06d}-{end_frame:06d}"
+        out_pose_path = str(out_dir / f"{run_name}.txt")
+
 
     # --------- load model cfg ----------
     cg = Config()
@@ -200,7 +169,7 @@ def track_sequence(cfg_path: str,
     print(f"[INFO] Saved poses: {out_pose_path}")
 
     # Plot immediately (same process)
-    plot_xy_trajectory_from_txt(out_pose_path, equal_axis=plot_equal)
+    draw_txt(out_pose_path)
 
 
 if __name__ == "__main__":

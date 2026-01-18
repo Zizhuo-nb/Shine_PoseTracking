@@ -141,9 +141,33 @@ def static_mapping(cg, voxel_field, mlp, dataloder, sampler, startframe, endfram
         scan.points = o3d.utility.Vector3dVector(points.cpu().numpy())
         if vis is not None:
             vis.update(scan=scan, mesh=mesh)
-    #######################mesher#####################
-    os.makedirs(cg.output_root, exist_ok=True)
-    full_mesh_prefix = os.path.join(cg.output_root, f"{cg.yaml_name}_{startframe:06d}-{endframe-1:06d}_full")
+    #######################save model##########################
+    run_name = f"{cg.yaml_name}_{startframe:06d}-{endframe-1:06d}"
+    model_root = getattr(cg, "model_root", None)
+    if not model_root:
+        model_root = os.path.join(cg.output_root, "models")
+    os.makedirs(model_root, exist_ok=True)
+    save_path = os.path.join(model_root, f"{run_name}.pth")
+    checkpoint = {
+        "voxel_field": voxel_field.state_dict(),
+        "mlp": mlp.state_dict(),
+        "feature_indexs_list": [idx.clone().cpu()
+                                for idx in voxel_field.feature_indexs_list],
+        "config": cg.__dict__,
+    }
+    torch.save(checkpoint, save_path)
+    print(f"[INFO] Model saved to: {save_path}")
+    ###########################################################
+    #######################mesher#############################
+    mesh_root = getattr(cg, "mesh_root", None) 
+    if not mesh_root:
+        mesh_root = os.path.join(cg.output_root, "meshes")
+
+    os.makedirs(mesh_root, exist_ok=True)
+
+    run_name = f"{cg.yaml_name}_{startframe:06d}-{endframe-1:06d}"
+    full_mesh_prefix = os.path.join(mesh_root, f"{run_name}_full")
+
 
     mesh = mesher.create_mesh(
         voxel_field, mlp, full_mesh_prefix,
@@ -154,24 +178,6 @@ def static_mapping(cg, voxel_field, mlp, dataloder, sampler, startframe, endfram
     mesh.compute_vertex_normals()
     print(f"[INFO] Full mesh saved: {full_mesh_prefix}.ply")
 
-    ##################################################
-    ###########################################################
-    run_name = f"{cg.yaml_name}_{startframe:06d}-{endframe-1:06d}"
-
-    save_dir = "model_save"             
-    os.makedirs(save_dir, exist_ok=True)
-
-    save_path = os.path.join(save_dir, f"{run_name}.pth")
-
-    checkpoint = {
-        "voxel_field": voxel_field.state_dict(),
-        "mlp": mlp.state_dict(),
-        "feature_indexs_list": [idx.clone().cpu()
-                                for idx in voxel_field.feature_indexs_list],
-        "config": cg.__dict__,
-    }
-    torch.save(checkpoint, save_path)
-    print(f"[INFO] Model saved to: {save_path}")
     ###########################################################
 
 if __name__ == "__main__":

@@ -1,48 +1,51 @@
 # 4D_Neural_SDF
 setting:
-  data_path: "/export/data/s39zzhan/data/maicity/mai_city/sequence/velodyne/"
-  pose_path: "/export/data/s39zzhan/data/maicity/mai_city/sequence/poses.txt"
+  data_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/mai_city/sequence/velodyne/"
+  pose_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/mai_city/sequence/poses.txt"
   calib_path: ""
-  output_root: "./results"
   begin_frame: 0
   end_frame: 100
   device: "cuda"
   gpu_id: "0"
   hash_buffer_size: 100000000
 
+  output_root: "../results"
+  model_dir: "../model_save/"
+  mesh_root: "../results/mesh/"
 
-  map_ply: "/export/data/s39zzhan/save_data/maicity/maicity.ply" #path to your reconstructed mesh
+####for vis####
+  map_ply: "../results/meshes/maicity_000000-000099_full.ply" #path to your reconstructed mesh
   vis_n: 1 #how many frames to estimate and show at a time
-  vis_k: 2 #Max frames showing on the map
-  vis_voxel: 0.01
+  enable_vis: false
   
 preprocessing:
   min_z: -5.0
-  radius: 90.0
+  radius: 30.0
+  
   
 neuralvoxel:
-  leaf_voxel_size: 0.2
-  voxel_level_num : 3
-  scale_up_factor : 2
-  feature_dim: 24  
-  feature_std: 0.001
+  leaf_voxel_size: 0.3
+  voxel_level_num : 2
+  scale_up_factor : 1.5
+  feature_dim: 16  
+  feature_std: 0.0
   
 decoder:
   mlp_level: 2
   mlp_hidden_dim: 128
 
 sampler:
-  truncated_sample_range_m: 0.2
-  truncated_sample_num: 5
-  occupied_sample_range_m: 0.5
+  truncated_sample_range_m: 0.5
+  truncated_sample_num: 3
+  occupied_sample_range_m: 0.45
   occupied_sample_num: 2
-  free_sample_num: 3
+  free_sample_num: 2
   
-mapping:
+mapping: 
   sliding_window_size: 30
-  iterion_num: 200
+  iterion_num: 20
   batch_size: 16384
-  learning_rate: 0.0005
+  learning_rate: 0.001
   
 meshing:
-   mesh_resolution: 0.4
+   mesh_resolution: 0.2
