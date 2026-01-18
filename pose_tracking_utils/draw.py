@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -21,8 +22,7 @@ def load_kitti_poses_txt(path: str) -> np.ndarray:
     tz = pose12[:, 11]
     return np.stack([tx, ty, tz], axis=1)
 
-def draw_txt(path):
-  
+def draw_txt(path: str):
     t = load_kitti_poses_txt(path)
     x, y = t[:, 0], t[:, 1]
 
@@ -31,8 +31,11 @@ def draw_txt(path):
     plt.xlabel("x (m)")
     plt.ylabel("y (m)")
     plt.title("XY Trajectory")
-
     plt.grid(True)
     plt.show()
 
-
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python draw_traj.py <poses.txt>")
+        sys.exit(1)
+    draw_txt(sys.argv[1])
