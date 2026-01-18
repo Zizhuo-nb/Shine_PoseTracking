@@ -25,7 +25,8 @@ conda activate shine_plus
 
 - `setting.data_path: "[FILL]"`
 - `setting.pose_path: "[FILL]"`
-- `setting.output_root: "./results"`
+- `setting.output_root: "[FILL]"`
+- `setting.map_ply: "[FILL]"`
 - `setting.begin_frame: [FILL]`
 - `setting.end_frame: [FILL]`
 
