@@ -79,7 +79,7 @@ def track_sequence(cfg_path: str,
         device=cg.device,
     )
 
-    ckpt = torch.load(ckpt_path, map_location=device)
+    ckpt = torch.load(ckpt_path, map_location=device,weights_only=True)
     vf_state = ckpt["voxel_field"]
 
     # Make sure features_list params exist with correct shapes
@@ -117,7 +117,7 @@ def track_sequence(cfg_path: str,
         raise IndexError(f"begin_frame={begin_frame} is more than gt_poses len={len(gt_poses_torch)}")
 
     init_T = gt_poses_torch[begin_frame].clone()
-    print(init_T)
+    # print(init_T)
 
     # --------- create tracker ----------
     tracker = icp_solver.Posetracker(

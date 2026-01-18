@@ -15,7 +15,7 @@ setting:
 ####for vis####
   map_ply: "../results/meshes/maicity_000000-000099_full.ply" #path to your reconstructed mesh
   vis_n: 1 #how many frames to estimate and show at a time
-  enable_vis: false
+  enable_vis: true
   
 preprocessing:
   min_z: -5.0

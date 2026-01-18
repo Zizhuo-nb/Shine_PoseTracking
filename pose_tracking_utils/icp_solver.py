@@ -60,11 +60,11 @@ class Posetracker:
         grads = compute_gradient(sdf, points)
 
 
-        if self.running_idx == 0:   # 只看第一帧
-            print("[DEBUG forward] sdf_mean=", sdf.abs().mean().item(),
-                "sdf_max=", sdf.abs().max().item(),
-                "grad_mean=", grads.norm(dim=-1).mean().item())
-            print(self.initpose)
+        # if self.running_idx == 0:   # 只看第一帧
+        #     print("[DEBUG forward] sdf_mean=", sdf.abs().mean().item(),
+        #         "sdf_max=", sdf.abs().max().item(),
+        #         "grad_mean=", grads.norm(dim=-1).mean().item())
+            # print(self.initpose)
 
         return points.detach(), sdf.detach() , grads.detach()
     
@@ -153,7 +153,7 @@ def df_icp(points, gradients, distances, GM_k = None):
         w = 1
     else:
         w = GM_k/(GM_k+distances**2)**2
-    cross = torch.cross(points, gradients)
+    cross = torch.cross(points, gradients, dim=-1)
     J = torch.cat([gradients,cross],-1)
     N = J.T @(w*J)
     g = -(J*w).T@distances

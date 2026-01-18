@@ -1,7 +1,6 @@
 # Partially borrowed from Nacho's lidar odometry (KISS-ICP)
 
 from abc import ABC
-import copy
 from functools import partial
 import os
 from typing import Callable, List

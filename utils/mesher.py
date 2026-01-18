@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # Copyright 2004-present Facebook. All Rights Reserved.
 
-import logging
+
 import numpy as np
-import plyfile
 import skimage.measure
 import time
 import torch
 import math
 import open3d as o3d
-import pdb
+
 
 
 def create_mesh(
