@@ -15,7 +15,7 @@ conda env create -f environment.yml
 
 ### 3) Activate the environment
 
-Use the environment name defined in environment.yml (example: shine_plus):
+Use the environment name defined in environment.yml (example: shine_posetracking):
 ```bash
 conda activate shine_posetracking
 ```
