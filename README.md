@@ -10,16 +10,14 @@ Anaconda3 : https://www.anaconda.com/download
 From the repository root:
 
 ```bash
-conda create -n shine_posetracking python=3.10 -y
-conda activate shine_posetracking
+conda env create -f environment.yml
 ```
 
 ### 3) Activate the environment
 
 Use the environment name defined in environment.yml (example: shine_plus):
 ```bash
-conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install open3d numpy matplotlib tqdm natsort pyyaml scikit-image
+conda activate shine_posetracking
 ```
 ## Run
 
