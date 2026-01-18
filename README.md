@@ -19,7 +19,7 @@ conda activate shine_posetracking
 Use the environment name defined in environment.yml (example: shine_plus):
 ```bash
 conda install -y pytorch pytorch-cuda=12.1 -c pytorch -c nvidia
-pip install open3d numpy matplotlib tqdm natsort pyyaml
+pip install open3d numpy matplotlib tqdm natsort pyyaml scikit-image
 ```
 ## Run
 
