@@ -36,6 +36,7 @@ conda activate shine_posetracking
 python mapping.py <path_to_yaml>
 python tracker.py --cfg <path_to_yaml> --ckpt <path_to_ckpt>
 ```
+after mapping, you will get .pth file and .ply file (.ply file is for "map_ply:" in yaml, set the path by your self)
 For tracker.py, if enable 'enable_vis' in yaml, it'll show the reconstruction and pointCloud for each frame
 ## Results
 ### 1) Ground Truth Trajectory
