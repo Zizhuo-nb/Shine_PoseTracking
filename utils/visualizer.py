@@ -30,7 +30,12 @@ class MapVisualizer(StubVisualizer):
         self.block_vis = True
         self.play_crun = False
         self.reset_bounding_box = True
-
+###########
+        self.gt_traj = o3d.geometry.LineSet()
+        self.gt_xyz = []   # list of (3,) np array
+        self.est_traj = o3d.geometry.LineSet()
+        self.est_xyz = []
+###########
         # Create data
         self.scan = o3d.geometry.PointCloud()
         self.dynamic_points = o3d.geometry.PointCloud()
@@ -73,7 +78,63 @@ class MapVisualizer(StubVisualizer):
             self.vis.update_renderer()
             # if self.play_crun:
             #     break
+    #############
+    def update_gt_traj(self, t_w):
+        """
+        t_w: (3,) array-like, world translation
+        """
+        self.gt_xyz.append(np.asarray(t_w, dtype=np.float64))
+        # 每10帧一个球（不然太费）
+        if len(self.gt_xyz) % 10 == 0:
+            sph = o3d.geometry.TriangleMesh.create_sphere(radius=self.traj_marker_radius)
+            sph.translate(self.gt_xyz[-1], relative=False)
+            sph.paint_uniform_color(GREEN)
+            sph.compute_vertex_normals()
+            self.gt_markers += sph
+            self.vis.update_geometry(self.gt_markers)
 
+        if len(self.gt_xyz) < 2:
+            return
+
+        pts = np.asarray(self.gt_xyz)
+        lines = np.column_stack([np.arange(len(pts)-1), np.arange(1, len(pts))]).astype(np.int32)
+
+        self.gt_traj.points = o3d.utility.Vector3dVector(pts)
+        self.gt_traj.lines  = o3d.utility.Vector2iVector(lines)
+
+        # 统一颜色（绿色）
+        colors = np.tile(GREEN.reshape(1,3), (lines.shape[0], 1))
+        self.gt_traj.colors = o3d.utility.Vector3dVector(colors)
+
+        self.vis.update_geometry(self.gt_traj)
+
+    def update_est_traj(self, t_w):
+        self.est_xyz.append(np.asarray(t_w, dtype=np.float64))
+        if len(self.est_xyz) % 10 == 0:
+            sph = o3d.geometry.TriangleMesh.create_sphere(radius=self.traj_marker_radius)
+            sph.translate(self.est_xyz[-1], relative=False)
+            sph.paint_uniform_color([1.0, 0.0, 0.0])
+            sph.compute_vertex_normals()
+            self.est_markers += sph
+            self.vis.update_geometry(self.est_markers)
+
+        if len(self.est_xyz) < 2:
+            return
+
+        pts = np.asarray(self.est_xyz)
+        lines = np.column_stack([np.arange(len(pts)-1), np.arange(1, len(pts))]).astype(np.int32)
+
+        self.est_traj.points = o3d.utility.Vector3dVector(pts)
+        self.est_traj.lines  = o3d.utility.Vector2iVector(lines)
+
+        # 红色估计轨迹
+        colors = np.tile(np.array([[1.0, 0.0, 0.0]]), (lines.shape[0], 1))
+        self.est_traj.colors = o3d.utility.Vector3dVector(colors)
+
+        self.vis.update_geometry(self.est_traj)
+
+
+    #############
     # Private Interaface ---------------------------------------------------------------------------
     def _initialize_visualizer(self):
         w_name = self.__class__.__name__
@@ -83,6 +144,15 @@ class MapVisualizer(StubVisualizer):
         self.vis.add_geometry(self.sdf)
         self.vis.add_geometry(self.frame)
         self.vis.add_geometry(self.mesh)
+        #########
+        self.vis.add_geometry(self.gt_traj)
+        self.vis.add_geometry(self.est_traj)
+        self.gt_markers = o3d.geometry.TriangleMesh()
+        self.est_markers = o3d.geometry.TriangleMesh()
+        self.traj_marker_radius = 0.3
+        self.vis.add_geometry(self.gt_markers)
+        self.vis.add_geometry(self.est_markers)
+        #########
         self._set_white_background(self.vis)
         self.vis.get_render_option().point_size = 2
         self.vis.get_render_option().light_on = True

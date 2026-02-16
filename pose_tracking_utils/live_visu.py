@@ -87,7 +87,7 @@ def run_live_viz(
         target_fid = int(target_fid)
         while int(tracker.running_idx) <= target_fid:
             fid = int(tracker.running_idx)
-            tracker.register_next() 
+            tracker.register_next_global() 
 
             pts_used = getattr(tracker, "last_used_points_world", None)
             if pts_used is not None and hasattr(pts_used, "numel") and pts_used.numel() > 0:

@@ -83,12 +83,16 @@ class dataLoader():
  
     def frame_raw(self, frame_id) -> torch.tensor:
         path = self.points_floder + self.points_path_list[frame_id]
-        np_points = self.read_point_cloud(path)
+        np_points,pcd,times = self.read_point_cloud(path,frame_id)
         torch_points = torch.from_numpy(np_points).to(self.device)
-        return torch_points
+        if times is None:
+            times = None
+        else:
+            times = torch.from_numpy(times).to(self.device)
+        return torch_points,pcd, times
     
     def frame_transfered(self, frame_id) -> torch.tensor:
-        points = self.frame_raw(frame_id)
+        points,_,_ = self.frame_raw(frame_id)
 
         pose = torch.tensor(self.poses[frame_id], device=self.device)
         allones = torch.ones(points.shape[0],1, device=self.device)
@@ -103,7 +107,7 @@ class dataLoader():
         return current_translation
     
 
-    def read_point_cloud(self, filename: str) -> np.ndarray:
+    def read_point_cloud(self, filename: str, frame_id: int = None) -> np.ndarray:
         # read point cloud from either (*.ply, *.pcd) or (kitti *.bin) format
         if ".bin" in filename:
             # we also read the intensity channel here
@@ -111,8 +115,36 @@ class dataLoader():
             points = points[:,0:3]
         elif ".ply" in filename or ".pcd" in filename:
             pc_load = o3d.io.read_point_cloud(filename)
+
+            pcd = pc_load.voxel_down_sample(0.2)
             points = np.asarray(pc_load.points)
+            pcd = np.asarray(pcd.points)
+            times = load_ply_time_only_fast(filename)
         else:
             sys.exit("The format of the imported point cloud is wrong (support only *pcd, *ply and *bin)")
 
-        return points 
+        return points,pcd,times
+
+
+#=============================================
+
+def load_ply_time_only_fast(filename: str) -> np.ndarray:
+    """
+    For YOUR confirmed PLY layout:
+      binary_little_endian
+      vertex: float x, float y, float z, double time
+    Returns:
+      times: (N,) float64
+    """
+    dt = np.dtype([("x", "<f4"), ("y", "<f4"), ("z", "<f4"), ("time", "<f8")])
+    with open(filename, "rb") as f:
+        # skip header
+        while True:
+            line = f.readline()
+            if not line:
+                raise RuntimeError("PLY header ended unexpectedly")
+            if line.strip() == b"end_header":
+                break
+        data = np.fromfile(f, dtype=dt)
+    return data["time"].astype(np.float64)
+

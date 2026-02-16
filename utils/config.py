@@ -6,11 +6,12 @@ class Config:
     def __init__(self):
 
         # Default values
+        self.incremental: bool = False
         self.data_path: str = ""  # input point cloud folder
         self.pose_path: str = ""  # input pose file
         self.calib_path: str = ""  # input calib file (to sensor frame)
         self.output_root: str = ""  # output root folder
-
+        self.enable_deskew: bool = False
         self.begin_frame: int = 0  # begin from this frame
         self.end_frame: int = 0  # end at this frame
         self.device: str = "cuda"  # use "cuda" or "cpu"
@@ -60,6 +61,8 @@ class Config:
         config_args = yaml.safe_load(open(os.path.abspath(config_file)))
 
         # setting
+        self.incremental = config_args["setting"].get("incremental",False)
+        self.enable_deskew = config_args["setting"].get("enable_deskew",False)
         self.data_path = config_args["setting"]["data_path"] 
         self.pose_path = config_args["setting"]["pose_path"]
         self.calib_path = config_args["setting"]["calib_path"]

@@ -50,7 +50,9 @@ def track_sequence(cfg_path: str,
     if out_pose_path is None:
         yaml_name = Path(cfg_path).stem
         run_name = f"{yaml_name}_{begin_frame:06d}-{end_frame:06d}"
-        out_pose_path = str(out_dir / f"{run_name}.txt")
+        pose_dir = out_dir / "pose_global"
+        pose_dir.mkdir(parents=True, exist_ok=True)
+        out_pose_path = str(pose_dir / f"{run_name}.txt")
 
 
     # --------- load model cfg ----------
@@ -79,7 +81,7 @@ def track_sequence(cfg_path: str,
         device=cg.device,
     )
 
-    ckpt = torch.load(ckpt_path, map_location=device,weights_only=True)
+    ckpt = torch.load(ckpt_path, map_location=device)
     vf_state = ckpt["voxel_field"]
 
     # Make sure features_list params exist with correct shapes
@@ -155,7 +157,7 @@ def track_sequence(cfg_path: str,
     while tracker.running_idx <= end_frame:
         i = int(tracker.running_idx)
         print(f"[INFO] Processing frame {i}: {os.path.basename(tracker.file_list[i])}")
-        T_global, _ = tracker.register_next()
+        T_global, _ = tracker.register_next_global()
         poses_out.append(T_global.detach().cpu())
 
     # Write as 12 floats per line (your plot script reads this)

@@ -19,37 +19,36 @@ class Posetracker:
                  radius = None,
                  min_z = None,
                  ):
-        
-        self.last_used_points_world = None   # (M,3) torch, world
-        self.last_used_frame_id = None
+        self.test_folder = test_folder
+        self.feature = voxel_field.to(device)
+        self.geo_decoder = geo_decoder.to(device)
+        self.device = device
+        self.running_idx = start_idx
+        self.max_dist = max_dist
+        self.GM_k = GM_k
+        self.num_iter = num_iter
+        self.initpose = init_pose
         self.radius = radius
         self.min_z = min_z
-        self.device = device
-        self.num_iter = num_iter
-        self.max_dist = max_dist
-    
-        self.feature = voxel_field.to(device)
-        self.geo_decoder = geo_decoder.to(device) 
-        self.running_idx = start_idx
 
-        self.initpose = init_pose
-        self.test_folder = test_folder
+        self.last_used_points_world = None   # (M,3) torch, world
+        self.last_used_frame_id = None
         self.file_list = natsorted(glob.glob(os.path.join(test_folder, "*.ply")))
         if len(self.file_list) == 0:
             raise RuntimeError(f"No .ply files found in {test_folder}")
-
-        self.GM_k = GM_k
+        #=================
+        self.prev_pose_1 = None   # T_{t-1}
+        self.prev_pose_2 = None   # T_{t-2}
+        self.prev_time_1 = None  # time for prev_pose_1 (k-1)
+        self.prev_time_2 = None
+        #=================
         self.pose = torch.eye(4, device=device, dtype=torch.float64)
-        
         if init_pose is None:
             self.pose = torch.eye(4, device=device, dtype=torch.float64)
         else:
             self.pose = init_pose.to(device=device, dtype=torch.float64)
-
         self.constant_velocity = torch.eye(4, device=device, dtype=torch.float64)
         self.est_poses = []
-
-        pass
 
     def forward(self, points:torch.Tensor):
         device = points.device
@@ -58,32 +57,9 @@ class Posetracker:
         sdf = forward_points_to_network(points, self.feature, self.geo_decoder)
         sdf = sdf.reshape(-1,1)
         grads = compute_gradient(sdf, points)
-
-
-        # if self.running_idx == 0:   # 只看第一帧
-        #     print("[DEBUG forward] sdf_mean=", sdf.abs().mean().item(),
-        #         "sdf_max=", sdf.abs().max().item(),
-        #         "grad_mean=", grads.norm(dim=-1).mean().item())
-            # print(self.initpose)
-
         return points.detach(), sdf.detach() , grads.detach()
-    
-        # pred = forward_points_to_network(points, self.feature, self.geo_decoder)  # (N,) logit
-        # occ  = torch.sigmoid(pred * self.scalar_factor).reshape(-1, 1)          # (N,1) prob
-        # res  = (occ - 0.5)*10                                                        # (N,1) 0-level set at 0.5
 
-        # grads = compute_gradient(res, points)                                   # d(res)/dx
-
-        # if self.running_idx == 0:
-        #     print("[DEBUG forward] valid_res_mean=", res.abs().mean().item(),
-        #         "res_max=", res.abs().max().item(),
-        #         "grad_mean=", grads.norm(dim=-1).mean().item())
-
-        # return points.detach(), res.detach(), grads.detach()
-
-
-
-    def register_next(self):
+    def register_next_global(self):
         if self.running_idx >= len(self.file_list):
             raise IndexError("No more scans to register.")
 
@@ -104,7 +80,42 @@ class Posetracker:
         self.est_poses.append(current_pose.detach().cpu().numpy())
         self.running_idx +=1
         return current_pose, scan
+    
+    def register_next(self,scan_xyz=None,frame_time: float = None):
+        
+        param = next(self.geo_decoder.parameters())
+        if scan_xyz is None:
+            raise RuntimeError("register_next() must be called with scan_xyz in the new pipeline")
+        if torch.is_tensor(scan_xyz):
+            points_xyz = scan_xyz.to(dtype=param.dtype, device=param.device)
+        else:
+            points_xyz = torch.tensor(scan_xyz, dtype=param.dtype, device=param.device)
 
+        points = torch.cat([points_xyz, torch.ones_like(points_xyz[:, :1])], dim=-1)
+
+        current_pose = self.registration_scan(
+            points,
+            num_iter=self.num_iter,
+            initial_guess=self.constant_velocity @ self.pose)
+        
+        self.constant_velocity = (
+            current_pose @ torch.linalg.inv(self.pose)
+            if len(self.est_poses) > 0 
+            else torch.eye(4, device=param.device, dtype=torch.float64))
+        
+        
+        self.prev_pose_2 = self.prev_pose_1
+        self.prev_pose_1 = current_pose.detach()
+
+        if frame_time is not None:
+            self.prev_time_2 = self.prev_time_1
+            self.prev_time_1 = float(frame_time)
+
+
+        self.pose = current_pose
+        self.est_poses.append(current_pose.detach().cpu().numpy())
+        self.running_idx +=1
+        return current_pose
 
     def registration_scan(self, points, num_iter, initial_guess = None):
         if initial_guess is None:
@@ -127,20 +138,20 @@ class Posetracker:
     def registration_step(self, points: torch.Tensor, GM_k=None):
         points, distances, gradients = self.forward(points)
         hash_valid = self.feature.get_valid_mask(points[...,:3])
-        grad_norm = gradients.norm(dim=-1, keepdim=True)
+        grad_norm = gradients.norm(dim=-1, keepdim=True) + 1e-12
         # eps = 1e-4
         # grad_valid = grad_norm.squeeze(-1) > eps
         # valid = hash_valid & grad_valid
         valid = hash_valid
         if valid.sum() < 10:
             print("valid points are too little!!!!!")
-            # return torch.eye(4, device=points.device, dtype=torch.float64)
+            
         points = points[valid] # (M,4)
         distances = distances[valid]  # (M,)
         gradients = gradients[valid] # (M,3)
         grad_norm = grad_norm[valid]  # (M,1)
-        # gradients = gradients/(grad_norm+ 1e-12)
-        # distances = distances/(grad_norm +1e-12)
+        gradients = gradients/(grad_norm+ 1e-12)
+        distances = distances/(grad_norm +1e-12)
         self.last_used_points_world = points.detach()
         self.last_used_frame_id = int(self.running_idx)
         T = df_icp(points[..., :3], gradients, distances, GM_k=GM_k)
@@ -157,7 +168,13 @@ def df_icp(points, gradients, distances, GM_k = None):
     J = torch.cat([gradients,cross],-1)
     N = J.T @(w*J)
     g = -(J*w).T@distances
-    t = torch.linalg.inv(N.to(dtype=torch.float64)) @ (g.to(dtype=torch.float64)).squeeze()
+
+    I = torch.eye(6, device=points.device, dtype=torch.float64)
+    lm_damp = 1e-4  
+    t = torch.linalg.solve(N.to(torch.float64) + lm_damp*I, g.to(torch.float64).squeeze())
+
+    # t = torch.linalg.inv(N.to(dtype=torch.float64)) @ (g.to(dtype=torch.float64)).squeeze()
+
     T = torch.eye(4, device=points.device, dtype=torch.float64)
     T[:3,:3] = expmap(t[3:])
     T[:3,-1] = t[:3]

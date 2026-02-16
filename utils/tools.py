@@ -153,3 +153,4 @@ def sdf_slice(field, mlp, t, max_x, min_x, max_y, min_y, max_z, min_z, max_range
     sdf_map_pc.colors = o3d.utility.Vector3dVector(colors)
 
     return sdf_map_pc
+

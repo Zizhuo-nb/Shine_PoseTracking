@@ -62,11 +62,11 @@ def forward_points_to_network(points, voxel_field, mlp):
 
 def process_points(points_world:torch.Tensor, T:torch.tensor, radius, min_z):
     xyz = points_world[..., :3]
-    # current_translation = T[:3,3].to(xyz.dtype)
-    # points_distance = torch.norm(xyz - current_translation, p=2, dim=1, keepdim=False)
-    # valid_mask = points_distance<radius
-    # valid_mask = valid_mask & (xyz[:, 2] > min_z)
-    valid_mask = xyz[:, 2] > min_z
+    current_translation = T[:3,3].to(xyz.dtype)
+    points_distance = torch.norm(xyz - current_translation, p=2, dim=1, keepdim=False)
+    valid_mask = points_distance<radius
+    valid_mask = valid_mask & (xyz[:, 2] > min_z)
+    # valid_mask = xyz[:, 2] > min_z
 
     points_world = points_world[valid_mask]
     return points_world
@@ -83,3 +83,4 @@ def compute_pose_error(T_est: torch.Tensor, T_gt: torch.Tensor):
     c = ((torch.trace(R_err) - 1.0) / 2.0).clamp(-1.0, 1.0)
     r_err = (torch.acos(c).item() * 180.0 / math.pi)
     return t_err, r_err, dt[0].item(), dt[1].item(), dt[2].item()
+
