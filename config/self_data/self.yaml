@@ -1,7 +1,7 @@
 # 4D_Neural_SDF
 setting:
   incremental: true # false = global mode
-  enable_deskew: true
+  enable_deskew: false
   data_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/self_data/data_round1/data/velodyne/"
   pose_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/self_data/data_round1/data/kitti_round1_poses.txt"
   calib_path: ""

@@ -1,20 +1,20 @@
 # 4D_Neural_SDF
 setting:
-  data_path: "/home_domuser/s39zzhan/ThirdSemester/project_02/data/cppdata/PLY/"
-  pose_path: "/home_domuser/s39zzhan/ThirdSemester/project_02/data/cppdata/Data/gt_poses.txt"
+  incremental: true # false = global mode
+  enable_deskew: false
+  data_path: ""
+  pose_path: ""
   calib_path: ""
   begin_frame: 0
-  end_frame: 6770
+  end_frame: 10
   device: "cuda"
   gpu_id: "0"
   hash_buffer_size: 100000000
 
   output_root: "../results"
-  mesh_root: "../results/meshes/"
-  
-####for vis####
-  map_ply: "../results/meshes/zappa_000000-006769_full.ply" #path to your reconstructed mesh
-  vis_n: 1 #how many frames to estimate and show at a time
+
+  map_ply: "" #path to your reconstructed mesh
+  vis_n: 1
   enable_vis: false
   
 preprocessing:

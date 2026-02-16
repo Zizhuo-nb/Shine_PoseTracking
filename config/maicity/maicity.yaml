@@ -1,20 +1,19 @@
-# 4D_Neural_SDF
 setting:
-  data_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/mai_city/sequence/velodyne/"
-  pose_path: "F:/UNIVERSITY_BONN/Third Semester/project_part2/data/mai_city/sequence/poses.txt"
+  incremental: true # false = global mode
+  enable_deskew: false
+  data_path: ""
+  pose_path: ""
   calib_path: ""
   begin_frame: 0
-  end_frame: 100
+  end_frame: 10
   device: "cuda"
   gpu_id: "0"
   hash_buffer_size: 100000000
 
   output_root: "../results"
-  mesh_root: "../results/mesh/"
 
-####for vis####
-  map_ply: "../results/meshes/maicity_000000-000099_full.ply" #path to your reconstructed mesh
-  vis_n: 1 #how many frames to estimate and show at a time
+  map_ply: "" #path to your reconstructed mesh
+  vis_n: 1
   enable_vis: false
   
 preprocessing:
