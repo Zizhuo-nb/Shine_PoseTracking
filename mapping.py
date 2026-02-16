@@ -68,8 +68,7 @@ def static_mapping(cg, voxel_field, mlp, dataloder, sampler, startframe, endfram
             radius=cg.radius,
             min_z=cg.min_z,
         )
-        ################################################
-            # ---- save estimated poses (online tracking result) ----
+        # ---- save estimated poses (online tracking result) ----
         pose_dir = os.path.join(cg.output_root, "poses_incre")
         os.makedirs(pose_dir, exist_ok=True)
         pose_path = os.path.join(pose_dir, f"{cg.yaml_name}_online_pose.txt")
