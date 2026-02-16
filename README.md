@@ -25,7 +25,7 @@ conda activate shine_posetracking
 
 - `setting.data_path: "[FILL]"`
 - `setting.pose_path: "[FILL]"`
-- `setting.output_root: "../results"`(by default)
+- `setting.output_root: "../results"` (by default)
 - `setting.map_ply: "[FILL]"` (from global mode)
 - `setting.begin_frame: [FILL]`
 - `setting.end_frame: [FILL]`
