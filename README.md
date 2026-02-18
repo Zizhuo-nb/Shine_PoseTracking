@@ -32,7 +32,7 @@ conda activate shine_posetracking
 - `setting.begin_frame: [FILL]`
 - `setting.end_frame: [FILL]`
 
-2)For Global mode, run mapping.py, then tracker.py:
+2)For Localization mode (with initial guess under map frame), run mapping.py, then tracker.py:
 
 ```bash
 python mapping.py <path_to_yaml>
