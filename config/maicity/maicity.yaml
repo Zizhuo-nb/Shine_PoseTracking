@@ -1,6 +1,6 @@
 setting:
-  incremental: true # false = global mode
-  enable_deskew: false
+  incremental: true # false = localization mode
+  enable_deskew: false # only works for incremental mode
   data_path: ""
   pose_path: ""
   calib_path: ""
