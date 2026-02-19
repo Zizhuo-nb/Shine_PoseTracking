@@ -57,8 +57,7 @@ python mapping.py <path_to_yaml>
 <img width="640" height="480" alt="Figure_tracked" src="https://github.com/user-attachments/assets/78c0cb4f-d731-4009-87b1-1cb5f68322f8" />
 
 ## Data
-Our own recorded data is published and shared.
-https://zenodo.org/records/18700647?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6IjFiNmRkYTE5LWQ0MDUtNGVlZC1iMTkxLWZlYThmMjg4N2QyZCIsImRhdGEiOnt9LCJyYW5kb20iOiIzNGQwZjlmYjk2ZjgwZmViYjUyY2EyZTE3NTNiMmViNiJ9.tXJAcRiZsXdPVZhWLnVJNwl4Ds-SAyJQitPkI2DQBR4UuLD6e2TNUa9vmjYqWpNJkJG-XMFGBAPiQcVyBkePLg
+zhang, . zizhuo ., wu, . shuyi ., & Trekel, N. (2026). Implicit Neural Mapping Test Dataset for Pose Tracking (Master Project) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.18700647
 
 ## References
 
