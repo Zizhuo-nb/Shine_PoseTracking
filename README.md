@@ -2,8 +2,6 @@ This work is for master project-group04.
 
 Superviser: Niklas Trekel (ntrekel@uni-bonn.de)
 
-![Demo](https://github.com/Zizhuo-nb/Shine_PoseTracking/issues/2)
-
 
 ## Environment Setup (Conda)
 
