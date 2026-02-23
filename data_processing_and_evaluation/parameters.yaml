@@ -1,0 +1,6 @@
+bag: "D:/project2/rosbag2_2025_11_21-14_48_34_only_lidar"   # metadata.yaml 
+topic: "/lidar_points"                                  #  PointCloud2 topic
+out: "D:/project2/data/without_deskewed"                        # output
+storage_id: "sqlite3"                            
+start_offset_sec: 0  #according to the start time and end time to split the dataset
+end_offset_sec: 
