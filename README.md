@@ -50,7 +50,7 @@ python mapping.py <path_to_yaml>
 <img width="640" height="480" alt="Figure_gt" src="https://github.com/user-attachments/assets/923707cf-44c6-448c-a101-8325044248aa" />
 
 
-### 2) Tracked Trajectory
+### 2) Estimated Trajectory
 <img width="640" height="480" alt="Figure_tracked" src="https://github.com/user-attachments/assets/78c0cb4f-d731-4009-87b1-1cb5f68322f8" />
 
 ## Data
